@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from "react-router-dom";
-import { Search } from "lucide-react";
+import { Search, ArrowRight, Sparkles, ShieldCheck, Zap, Gift } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useProducts } from "../Context/ProductContext";
 
+// WhatsApp number
 const whatsappNumber = "9746683778";
 
 const WhatsAppIcon = ({ size = 24, className = "" }) => (
@@ -11,6 +13,14 @@ const WhatsAppIcon = ({ size = 24, className = "" }) => (
   </svg>
 );
 
+// Normalize category names for consistent matching
+const categoryMap = {
+  "All": "All",
+  "Frames": "frames",
+  "Albums": "albums",
+  "Photo Books": "books"
+};
+
 const categories = ["All", "Frames", "Albums", "Photo Books"];
 
 export default function ProductsShop() {
@@ -18,257 +28,179 @@ export default function ProductsShop() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
-  const getInternalCategory = (displayCat) => {
-    switch (displayCat) {
-      case "Frames": return "frames";
-      case "Albums": return "albums";
-      case "Photo Books": return "books";
-      default: return "";
-    }
-  };
+  // Memoized filtering for performance
+  const filteredProducts = useMemo(() => {
+    return products.filter(product => {
+      const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const targetCategory = categoryMap[selectedCategory];
+      const matchesCategory = targetCategory === "All" || product.category.toLowerCase() === targetCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [products, searchQuery, selectedCategory]);
 
-  const getDisplayCategory = (internalCat) => {
-    switch (internalCat) {
-      case "frames": return "Frames";
-      case "albums": return "Albums";
-      case "books": return "Photo Books";
-      default: return internalCat || "Product";
-    }
-  };
-
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = 
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      getDisplayCategory(product.category).toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || product.category === getInternalCategory(selectedCategory);
-    return matchesSearch && matchesCategory;
-  });
-
-  const whatsappMessage = (product) => encodeURIComponent(
-    `Hi! I'm interested in the ${product.name} priced at ₹${product.price}. Category: ${getDisplayCategory(product.category)}\nCan you provide more details, customization options, and availability?`
-  );
+  const whatsappMessage = (p) => encodeURIComponent(`Hi! I'm interested in the ${p.name} priced at ₹${p.price}. Can you share more details?`);
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
+    <div className="min-h-screen bg-[#fafafa] text-gray-900 selection:bg-yellow-200">
+      
       {/* Hero Banner */}
-     <section
-  className="relative h-36 sm:h-44 md:h-52 w-full bg-cover bg-center"
-  style={{
-    backgroundImage:
-      "url('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1470&q=80')",
-  }}
->
-  <div className="absolute inset-0 bg-black/55 flex flex-col justify-center items-center text-center px-5">
-    <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white mb-2">
-      Our Products
-    </h1>
-
-    <p className="text-sm sm:text-base md:text-lg text-gray-200 max-w-3xl">
-      Explore premium <span className="text-[#f7ef22] font-semibold">Albums</span>,{" "}
-      <span className="text-[#f7ef22] font-semibold">Photo Frames</span>, and{" "}
-      <span className="text-[#f7ef22] font-semibold">Photo Books</span> crafted for every memory.
-    </p>
-  </div>
-</section>
-
-
-      {/* Title */}
-      {/* <section className="py-8 md:py-12 bg-white">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-3xl md:text-4xl font-black mb-3">Our Product Collection</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Discover handcrafted frames, personalized albums, and elegant photo books.
-          </p>
+      <section className="relative w-full h-[65vh] md:h-[75vh] flex items-center overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <img
+            src="https://images.unsplash.com/photo-1544377193-33dcf4d68fb5?auto=format&fit=crop&w=2000&q=90"
+            alt="Premium Albums"
+            className="w-full h-full object-cover object-center scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent md:via-black/30" />
         </div>
-      </section> */}
+
+        <div className="max-w-7xl mx-auto px-6 relative z-10 w-full">
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <span className="text-yellow-400 font-black text-[10px] md:text-xs uppercase tracking-[0.5em] block mb-4 border-l-2 border-yellow-400 pl-4">
+              Exclusive Craftsmanship
+            </span>
+            <h1 className="text-white text-6xl md:text-9xl font-black tracking-tighter leading-[0.8] mb-6">
+              OUR <br />
+              <span className="text-transparent [-webkit-text-stroke:1.5px_#fff] italic">PRODUCTS</span>
+            </h1>
+            <p className="text-gray-300 font-medium max-w-lg text-sm md:text-lg leading-relaxed mb-8">
+              Transforming your digital memories into 
+              <span className="text-white font-bold ml-1">Physical Masterpieces</span>. 
+              Premium textures, museum-grade paper, and timeless frames.
+            </p>
+            {/* <div className="flex flex-wrap gap-4">
+              <Link to="/custom-book" className="bg-yellow-400 text-black px-8 py-4 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-white hover:scale-105 transition-all shadow-2xl flex items-center gap-2">
+                Start Customizing <ArrowRight size={16} />
+              </Link>
+            </div> */}
+          </motion.div>
+        </div>
+      </section>
 
       {/* Sticky Filter Bar */}
-    <div className="sticky top-0 bg-white z-40 shadow-lg border-b border-gray-200">
-  <div className="max-w-7xl mx-auto px-4 py-4">
-    
-    {/* Search */}
-    <div className="relative mb-4">
-      <Search
-        className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"
-        size={20}
-      />
-      <input
-        type="text"
-        placeholder="Search products..."
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className="
-          w-full pl-12 pr-6 py-3.5 rounded-full
-          border border-gray-300
-          focus:border-[#f7ef22]
-          focus:outline-none
-          focus:ring-4 focus:ring-[#f7ef22]/40
-          transition-all text-base shadow-sm
-        "
-      />
-    </div>
+      <div className="sticky top-16 md:top-20 z-40 px-4 md:px-6 -mt-10 mb-12">
+        <div className="max-w-5xl mx-auto bg-white/95 backdrop-blur-xl border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-[32px] p-2 md:p-3 flex flex-col md:flex-row gap-3 items-center">
+          <div className="relative w-full md:flex-1">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              type="text"
+              placeholder="Search our collection..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-14 pr-6 py-4 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-yellow-400/50 transition-all text-sm font-bold outline-none"
+            />
+          </div>
 
-    {/* Category Pills */}
-    <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4">
-      {categories.map((cat) => (
-        <button
-          key={cat}
-          onClick={() => setSelectedCategory(cat)}
-          className={`px-5 py-2.5 rounded-full font-medium text-sm whitespace-nowrap transition-all duration-300 shadow-sm flex-shrink-0 ${
-            selectedCategory === cat
-              ? "bg-[#f7ef22] text-black ring-4 ring-[#f7ef22]/40"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-          }`}
-        >
-          {cat}
-        </button>
-      ))}
-    </div>
-
-  </div>
-</div>
-
-
-      {/* Products Grid - Compact on Mobile */}
-      <section className="py-6 md:py-12 bg-gray-50">
-  <div className="max-w-7xl mx-auto px-4 md:px-6">
-    {filteredProducts.length === 0 ? (
-      <div className="text-center py-20">
-        <p className="text-xl text-gray-500">
-          No products match your search.
-        </p>
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide w-full md:w-auto px-2 pb-1">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-6 py-3 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all whitespace-nowrap ${
+                  selectedCategory === cat
+                    ? "bg-black text-white shadow-lg scale-105"
+                    : "bg-white text-gray-400 border border-gray-100 hover:text-black"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
-    ) : (
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
-        {filteredProducts.map((product) => (
-          <Link
-            key={product.id}
-            to={`/product/${product.id}`}
-            className="group block"
-          >
-            <div className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
 
-              {/* Image */}
-              <div className="aspect-[3/4] relative overflow-hidden bg-gray-100">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  loading="lazy"
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                />
+      {/* Product Grid */}
+      <section className="pb-24 px-4 md:px-6">
+        <div className="max-w-7xl mx-auto">
+          {filteredProducts.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-20"
+            >
+              <p className="text-xl font-black text-gray-400">No products found matching your search.</p>
+            </motion.div>
+          ) : (
+            <motion.div layout className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+              <AnimatePresence mode="popLayout">
+                {filteredProducts.map((product, index) => (
+                  <motion.div
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.4, delay: index * 0.03 }}
+                    key={product.id}
+                    className="group"
+                  >
+                    <Link to={`/product/${product.id}`} className="block h-full">
+                      <div className="bg-white rounded-[40px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 flex flex-col h-full">
+                        <div className="aspect-[4/5] relative overflow-hidden bg-gray-50">
+                          <img
+                            src={product.image}
+                            alt={product.name}
+                            className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                          />
+                          <div className="absolute top-5 left-5 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest">
+                            {product.category}
+                          </div>
+                        </div>
+                        <div className="p-6 text-center flex flex-col flex-grow">
+                          <h3 className="font-black text-xs md:text-sm uppercase tracking-tighter mb-2 group-hover:text-yellow-600 transition-colors">
+                            {product.name}
+                          </h3>
+                          <p className="text-xl font-black text-gray-900 mb-6">₹{product.price}</p>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation(); // Prevent Link navigation
+                              window.open(`https://wa.me/${whatsappNumber}?text=${whatsappMessage(product)}`, '_blank');
+                            }}
+                            className="mt-auto w-full bg-black text-white py-4 rounded-2xl flex items-center justify-center gap-2 hover:bg-yellow-400 hover:text-black transition-all font-black text-[9px] uppercase tracking-widest"
+                          >
+                            <WhatsAppIcon size={14} />
+                            Order Now
+                          </button>
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
+          )}
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="py-20 bg-black text-white rounded-t-[50px] md:rounded-t-[100px]">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
+          {[
+            { icon: Sparkles, label: "Premium Finish" },
+            { icon: ShieldCheck, label: "Lifetime Warranty" },
+            { icon: Zap, label: "Express Print" },
+            { icon: Gift, label: "Luxury Packing" }
+          ].map((item, i) => (
+            <div key={i} className="flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-yellow-400 rounded-2xl flex items-center justify-center text-black mb-4">
+                <item.icon size={20} />
               </div>
-
-              {/* Content */}
-              <div className="p-3 md:p-5 text-center">
-                <span className="inline-block px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full mb-2 bg-[#f7ef22]/30 text-black">
-                  {getDisplayCategory(product.category)}
-                </span>
-
-                <h3 className="font-bold text-sm md:text-base mb-2 line-clamp-2 min-h-[2.5em]">
-                  {product.name}
-                </h3>
-
-                {/* Price Section */}
-                <div className="mb-3 md:mb-4">
-                  {product.originalPrice && (
-                    <p className="text-xs md:text-sm text-gray-400 line-through">
-                      ₹{product.originalPrice}
-                    </p>
-                  )}
-                  <p className="text-lg md:text-2xl font-black text-[black]">
-                    ₹{product.price}
-                  </p>
-                </div>
-
-                {/* WhatsApp CTA */}
-               <a
-  href={`https://wa.me/${whatsappNumber}?text=${whatsappMessage(product)}`}
-  target="_blank"
-  rel="noopener noreferrer"
-  onClick={(e) => e.stopPropagation()}
-  className="
-    inline-flex items-center justify-center w-full gap-2
-    bg-[#f7ef22] hover:bg-[#e0d81e] active:bg-[#d4cc1a]
-    text-black font-bold
-    py-2.5 md:py-3
-    rounded-full
-    transition-all duration-200
-    text-xs md:text-sm
-    shadow-md hover:shadow-lg
-  "
->
-  <WhatsAppIcon size={16} className="md:hidden" />
-  <WhatsAppIcon size={18} className="hidden md:block" />
-  <span>Order Now</span>
-</a>
-
-              </div>
+              <h4 className="font-black uppercase tracking-widest text-[10px]">{item.label}</h4>
             </div>
-          </Link>
-        ))}
-      </div>
-    )}
-  </div>
-</section>
+          ))}
+        </div>
+      </section>
 
-      {/* Bottom CTA */}
-      <section className="py-12 md:py-16 bg-[#f7ef22]/20">
-  <div className="max-w-7xl mx-auto px-4 md:px-6">
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-
-      {/* Offer 1 */}
-      <div className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition">
-        <p className="text-3xl mb-2">🎉</p>
-        <h4 className="font-bold text-base md:text-lg mb-1">Best Prices</h4>
-        <p className="text-sm text-gray-600">
-          Direct pricing with exciting offers
-        </p>
-      </div>
-
-      {/* Offer 2 */}
-      <div className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition">
-        <p className="text-3xl mb-2">🖼️</p>
-        <h4 className="font-bold text-base md:text-lg mb-1">
-          Premium Quality
-        </h4>
-        <p className="text-sm text-gray-600">
-          High-quality frames & albums
-        </p>
-      </div>
-
-      {/* Offer 3 */}
-      <div className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition">
-        <p className="text-3xl mb-2">⚡</p>
-        <h4 className="font-bold text-base md:text-lg mb-1">
-          Fast Processing
-        </h4>
-        <p className="text-sm text-gray-600">
-          Quick order & fast delivery
-        </p>
-      </div>
-
-      {/* Offer 4 */}
-      <div className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition">
-        <p className="text-3xl mb-2">🎁</p>
-        <h4 className="font-bold text-base md:text-lg mb-1">
-          Bundle Savings
-        </h4>
-        <p className="text-sm text-gray-600">
-          Save more with combo deals
-        </p>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-      <style jsx>{`
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
+      {/* Custom CSS for text stroke (works in all CRA/Vite setups) */}
+      <style jsx global>{`
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        [class*="-webkit-text-stroke"] {
+          -webkit-text-stroke: 1.5px #fff;
         }
       `}</style>
     </div>
