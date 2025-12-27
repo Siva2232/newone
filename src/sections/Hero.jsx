@@ -162,7 +162,7 @@ Can you provide more details, customization options, and confirm availability?`
             {product.originalPrice && (
               <p className="text-sm line-through text-gray-400">₹{product.originalPrice}</p>
             )}
-            <p className="text-xl font-bold text-[#f7ef22]">₹{product.price}</p>
+            <p className="text-xl font-bold text-[black]">₹{product.price}</p>
           </div>
           <a
             href={`https://wa.me/${whatsappNumber}?text=${message}`}
@@ -227,7 +227,7 @@ const CarouselSection = ({ title, products }) => {
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-2xl md:text-3xl font-black">{title}</h2>
-          <Link to="/shop"   className="font-bold text-base md:text-lg text-[black] hover:text-[#e6dd1f] transition-colors">See All →</Link>
+          <a href="/models" className="font-bold text-base md:text-lg text-[black] hover:text-[#e6dd1f] transition-colors">See All →</a>
         </div>
 
         <div className="relative group">
